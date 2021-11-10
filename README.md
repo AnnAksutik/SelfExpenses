@@ -1,2 +1,2 @@
-# class_expensetrack
-Creating a class that can save and manage your expences
+# SelfExpenses
+Creating a website for users that they can manage expenses by
