@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<hr>
+<h2>Котегории платежей</h2>
+<ul class="list-posts">
+{% for p in categories %}
+<li>
+<p class="title"><a href="{{ url_for('show_expense', alias=p.category)}}">{{p.category}}</a></p>
+</li>
+{% endfor %}
+</ul>
+{{ post | safe }}
+	<hr align=left width="300px">
+<p><a href="{{url_for('add_expense')}}">Добавить платеж</a>
+{% endblock %}

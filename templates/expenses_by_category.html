@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<hr>
+<h2>{{title2}}</h2>
+<ul class="list-posts">
+{% for p in expenses %}
+<li>
+<p class="title">Назначение платежа: {{p.aim}}
+	<br />Дата транзакции: {{p.date}}
+	<br />Сумма: {{p.amount}}</p>
+</li>
+{% endfor %}
+</ul>
+{{ post | safe }}
+	<hr align=left width="300px">
+<p>Итого: {{result}}</p>
+<p><a href="{{url_for('my_expenses')}}">Назад</a>
+{% endblock %}

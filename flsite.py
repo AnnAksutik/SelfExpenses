@@ -59,6 +59,20 @@ class Profiles(db.Model):
         return f"<profiles {self.id}>"
 
 
+class Expenses(db.Model):
+    __tablename__ = 'expenses'
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=True)
+    aim = db.Column(db.String(200), nullable=True)
+    amount = db.Column(db.Float)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return f"<expense {self.id}>"
+
+
 @app.route('/')
 def index():
     return render_template('base.html', menu=menu)
@@ -119,9 +133,45 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    return render_template("profile.html", menu=menu, title="Мой профиль", name=Profiles.query.get(current_user.id).name)
+    return render_template("profile.html", menu=menu, title="Мой профиль",
+                           name=Profiles.query.get(current_user.id).name)
+
+@app.route('/my_expenses')
+@login_required
+def my_expenses():
+    categories = db.session.query(Expenses.category).filter(Expenses.user_id == current_user.id).group_by(Expenses.category)
+    return render_template("myexpenses.html", menu=menu, title="Мои расходы", categories=categories)
 
 
+@app.route("/my_expenses/<alias>")
+@login_required
+def show_expense(alias):
+    expenses = db.session.query(Expenses).filter(Expenses.category == alias, Expenses.user_id == current_user.id).order_by(db.desc(Expenses.date)).all()
+    result = 0
+    for i in db.session.query(Expenses.amount).filter(Expenses.category == alias, Expenses.user_id == current_user.id):
+        result += i.amount
+    result = round(result, 2)
+    return render_template('expenses_by_category.html', menu=menu, title='Мои расходы', expenses=expenses, title2=alias, result=result)
+
+
+@app.route('/add_expense', methods=['POST', 'GET'])
+@login_required
+def add_expense():
+    form = ExpensesForm()
+    if form.validate_on_submit():
+        try:
+            expence = Expenses(category=form.category.data, aim=form.aim.data,
+                           amount=form.amount.data, date=form.date.data, user_id=current_user.id)
+            db.session.add(expence)
+            db.session.flush()
+            db.session.commit()
+        except:
+            db.session.rollback()
+            print("Ошибка добавления в БД")
+            flash("Ошибка добавления в БД", 'error')
+        flash("Платеж внесен", "success")
+        return redirect(url_for('my_expenses'))
+    return render_template("add_expense.html", menu=menu, title="Мои расходы", form=form)
 
 
 if __name__ == "__main__":

@@ -26,3 +26,13 @@ class RegisterForm(FlaskForm):
     psw_2 = PasswordField("Повтор пароля: ",
                           validators=[DataRequired(), EqualTo('psw_1', message="Пароли не совпадают")])
     submit = SubmitField("Регистрация")
+
+
+class ExpensesForm(FlaskForm):
+    category = StringField('Категория: ',
+                       validators=[Length(min=1, max=100, message='Катего')])
+    aim = StringField('Назначение платежа: ',
+                          validators=[Length(min=1, max=250)])
+    amount = DecimalField('Сумма: ', places=2)
+    date = DateField('Дата платежа: ')
+    submit = SubmitField("Добавить платеж")
